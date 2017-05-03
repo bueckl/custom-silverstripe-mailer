@@ -204,32 +204,32 @@ class SmtpMailer extends Mailer {
 
         $this->mailer->ClearCustomHeaders();
 
-        foreach( $headers as $header_name => $header_value ) {
-            $this->mailer->AddCustomHeader( $header_name.':'.$header_value );
-        }
+        // foreach( $headers as $header_name => $header_value ) {
+        //     $this->mailer->AddCustomHeader( $header_name.':'.$header_value );
+        // }
 
         // The folowing lines provoced double Headers. Removed!!!
 
 		//Convert cc/bcc/ReplyTo from headers to properties
-                // foreach($headers as $header_name => $header_value){
-                //                           if(in_array(strtolower($header_name), array('cc', 'bcc', 'reply-to', 'replyto'))){
-                //                             $addresses = preg_split('/(,|;)/', $header_value);
-                //                           }
-                //                           switch(strtolower($header_name)) {
-                //                             case 'cc':
-                //                               foreach($addresses as $address){ $this->mailer->addCC($address); }
-                //                               break;
-                //                             case 'bcc':
-                //                               foreach($addresses as $address) { $this->mailer->addBCC($address); }
-                //                               break;
-                //                             case 'reply-to':
-                //                               foreach($addresses as $address) { $this->mailer->addReplyTo($address); }
-                //                               break;
-                //                             default:
-                //     $this->mailer->AddCustomHeader($header_name . ':' . $header_value);
-                //                               break;
-                //                           }
-                // }
+                foreach($headers as $header_name => $header_value){
+                                          if(in_array(strtolower($header_name), array('cc', 'bcc', 'reply-to', 'replyto'))){
+                                            $addresses = preg_split('/(,|;)/', $header_value);
+                                          }
+                                          switch(strtolower($header_name)) {
+                                            case 'cc':
+                                              foreach($addresses as $address){ $this->mailer->addCC($address); }
+                                              break;
+                                            case 'bcc':
+                                              foreach($addresses as $address) { $this->mailer->addBCC($address); }
+                                              break;
+                                            case 'reply-to':
+                                              foreach($addresses as $address) { $this->mailer->addReplyTo($address); }
+                                              break;
+                                            default:
+                    $this->mailer->AddCustomHeader($header_name . ':' . $header_value);
+                                              break;
+                                          }
+                }
     }
 
     /**
