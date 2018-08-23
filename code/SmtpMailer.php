@@ -52,6 +52,7 @@ class SmtpMailer extends Mailer {
      */
     protected function configure() {
         $conf = self::get_conf();
+
         if ( !$this->mailer ) {
             $this->mailer = new PHPMailer( true );
             $this->mailer->IsSMTP();
@@ -66,6 +67,14 @@ class SmtpMailer extends Mailer {
             }
             $this->mailer->SMTPDebug = $conf->debug;
             $this->mailer->SetLanguage( $conf->lang );
+            
+            $this->mailer->SMTPOptions = array('ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ));
+            
+            
         }
     }
 
