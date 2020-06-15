@@ -3,7 +3,11 @@
  * Thanks to Dean Rather <dean@deanrather.com>
  *                       https://github.com/deanrather
  */
-class SMTP_LogEmailWriter extends SS_LogEmailWriter {
+namespace CustomSilvertripeMailer;
+
+use SilverStripe\Control\Email\Email;
+
+class SMTP_LogEmailWriter extends CustomLogErrorEmailFormatter {
 
 	/**
 	 * Send an email to the email address set in
@@ -12,7 +16,7 @@ class SMTP_LogEmailWriter extends SS_LogEmailWriter {
 	public function _write($event) {
 		// If no formatter set up, use the default
 		if(!$this->_formatter) {
-			$formatter = new SS_LogErrorEmailFormatter();
+			$formatter = new CustomLogErrorEmailFormatter();
 			$this->setFormatter($formatter);
 		}
 

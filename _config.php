@@ -1,4 +1,6 @@
 <?php
+use SilverStripe\Core\Injector\Injector;
+use \SilverStripe\Control\Email\Email;
 
-Email::set_mailer(new SmtpMailer);
-Object::useCustomClass('Email', 'SMTPEmail');
+Injector::inst()->registerService(new SmtpMailer, 'Mailer');
+Injector::inst()->create('Email', 'SMTPEmail');

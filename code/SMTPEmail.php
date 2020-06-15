@@ -1,4 +1,8 @@
 <?php
+namespace CustomSilvertripeMailer;
+
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Email\Email;
 
 class SMTPEmail extends Email {
 

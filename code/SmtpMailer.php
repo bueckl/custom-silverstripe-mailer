@@ -1,6 +1,16 @@
 <?php
+namespace CustomSilvertripeMailer;
 
-class SmtpMailer extends Mailer {
+
+use PHPMailer\PHPMailer\PHPMailer;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Email\Email;
+use SilverStripe\Control\Email\Mailer;
+use SilverStripe\Core\Convert;
+use Exception;
+use SilverStripe\Dev\Debug;
+
+class SmtpMailer implements Mailer {
 
     public $mailer = null;
 
@@ -27,6 +37,10 @@ class SmtpMailer extends Mailer {
      */
     public function __construct($mailer = null) {
         $this->mailer = $mailer;
+    }
+
+    public function send($email) {
+
     }
 
     /**
@@ -147,9 +161,11 @@ class SmtpMailer extends Mailer {
                 die();
             }
 
-        } catch( phpmailerException $e ) {
-            $this->handleError( $e->errorMessage(), $msgForLog );
-        } catch( Exception $e ) {
+        }
+//        catch( phpmailerException $e ) {
+//            $this->handleError( $e->errorMessage(), $msgForLog );
+//        }
+        catch( Exception $e ) {
             $this->handleError( $e->getMessage(), $msgForLog );
         }
 
@@ -164,7 +180,7 @@ class SmtpMailer extends Mailer {
     public function handleError( $e, $msgForLog )
     {
         $msg = $e . $msgForLog;
-        Debug::log( $msg );
+        Debug::message( $msg );
         throw new Exception($msg);
     }
 
@@ -185,7 +201,7 @@ class SmtpMailer extends Mailer {
         }
 
         // not entirely sure what this will do
-        if (!Email::validEmailAddress($to)) $to = false;
+        if (!Email::is_valid_address($to)) $to = false;
 
         $this->mailer->ClearAddresses();
         $this->mailer->AddAddress( $to, ucfirst( substr( $to, 0, strpos( $to, '@' ) ) ) ); // For the recipient's name, the string before the @ from the e-mail address is used
@@ -206,7 +222,7 @@ class SmtpMailer extends Mailer {
         foreach( $headers as $header_name => $header_value ) {
             $this->mailer->AddCustomHeader( $header_name.':'.$header_value );
         }
-		
+
 		//Convert cc/bcc/ReplyTo from headers to properties
 				foreach($headers as $header_name => $header_value){
 		                  if(in_array(strtolower($header_name), array('cc', 'bcc', 'reply-to', 'replyto'))){
