@@ -1,6 +1,6 @@
 <?php
 use SilverStripe\Core\Injector\Injector;
-use \SilverStripe\Control\Email\Email;
+use CustomSilvertripeMailer\SmtpMailer;
+use SilverStripe\Control\Email\Mailer;
 
-Injector::inst()->registerService(new \CustomSilvertripeMailer\SmtpMailer(), 'Mailer');
-Injector::inst()->create(Email::class, 'koshala.manojeewa@silverstripers.com');
+Injector::inst()->registerService(new SmtpMailer(), Mailer::class);
