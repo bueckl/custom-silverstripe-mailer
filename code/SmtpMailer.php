@@ -40,7 +40,8 @@ class SmtpMailer implements Mailer {
     }
 
     public function send($email) {
-
+        $this->configure();
+        $this->mailer->send($email);
     }
 
     /**
@@ -68,7 +69,7 @@ class SmtpMailer implements Mailer {
         $conf = self::get_conf();
         if ( !$this->mailer ) {
             $this->mailer = new PHPMailer( true );
-            $this->mailer->IsSMTP();
+            $this->mailer->isSMTP();
             $this->mailer->CharSet = $conf->charset_encoding;
             $this->mailer->Host = $conf->server;
             $this->mailer->Port = $conf->port;
@@ -79,7 +80,7 @@ class SmtpMailer implements Mailer {
                 $this->mailer->Password = $conf->pass;
             }
             $this->mailer->SMTPDebug = $conf->debug;
-            $this->mailer->SetLanguage( $conf->lang );
+            $this->mailer->setLanguage( $conf->lang );
         }
     }
 
@@ -96,7 +97,7 @@ class SmtpMailer implements Mailer {
      */
     public function sendPlain($to, $from, $subject, $plainContent, $attachedFiles = false, $customheaders = false) {
         $this->configure();
-        $this->mailer->IsHTML( false );
+        $this->mailer->isHTML( false );
         $this->mailer->Body = $plainContent;
         return $this->sendMailViaSmtp( $to, $from, $subject, $attachedFiles, $customheaders, false );
     }
@@ -117,9 +118,9 @@ class SmtpMailer implements Mailer {
      */
     public function sendHTML($to, $from, $subject, $htmlContent, $attachedFiles = false, $customheaders = false, $plainContent = false, $inlineImages = false) {
         $this->configure();
-        $this->mailer->IsHTML( true );
+        $this->mailer->isHTML( true );
         if( $inlineImages ) {
-            $this->mailer->MsgHTML( $htmlContent, Director::baseFolder() );
+            $this->mailer->msgHTML( $htmlContent, Director::baseFolder() );
         } else {
             $this->mailer->Body = $htmlContent;
             if( empty( $plainContent ) ) $plainContent = trim( Convert::html2raw( $htmlContent ) );
@@ -153,7 +154,7 @@ class SmtpMailer implements Mailer {
             $this->buildBasicMail( $to, $from, $subject );
             $this->addCustomHeaders( $customheaders );
             $this->attachFiles( $attachedFiles );
-            $result = $this->mailer->Send();
+            $result = $this->mailer->send();
 
             if( $this->mailer->SMTPDebug > 0 ) {
                 echo "<em><strong>*** E-mail to $to has been sent.</strong></em><br />";
@@ -194,17 +195,17 @@ class SmtpMailer implements Mailer {
     {
         if( preg_match('/(\'|")(.*?)\1[ ]+<[ ]*(.*?)[ ]*>/', $from, $from_splitted ) ) {
             // If $from countain a name, e.g. "My Name" <me@acme.com>
-            $this->mailer->SetFrom( $from_splitted[3], $from_splitted[2] );
+            $this->mailer->setFrom( $from_splitted[3], $from_splitted[2] );
         }
         else {
-            $this->mailer->SetFrom( $from );
+            $this->mailer->setFrom( $from );
         }
 
         // not entirely sure what this will do
         if (!Email::is_valid_address($to)) $to = false;
 
-        $this->mailer->ClearAddresses();
-        $this->mailer->AddAddress( $to, ucfirst( substr( $to, 0, strpos( $to, '@' ) ) ) ); // For the recipient's name, the string before the @ from the e-mail address is used
+        $this->mailer->clearAddresses();
+        $this->mailer->addAddress( $to, ucfirst( substr( $to, 0, strpos( $to, '@' ) ) ) ); // For the recipient's name, the string before the @ from the e-mail address is used
         $this->mailer->Subject = $subject;
     }
 
@@ -218,31 +219,31 @@ class SmtpMailer implements Mailer {
         if( !isset( $headers["X-Mailer"] ) ) $headers["X-Mailer"] = X_MAILER;
         if( !isset( $headers["X-Priority"] ) ) $headers["X-Priority"] = 3;
 
-        $this->mailer->ClearCustomHeaders();
+        $this->mailer->clearCustomHeaders();
         foreach( $headers as $header_name => $header_value ) {
-            $this->mailer->AddCustomHeader( $header_name.':'.$header_value );
+            $this->mailer->addCustomHeader( $header_name.':'.$header_value );
         }
 
-		//Convert cc/bcc/ReplyTo from headers to properties
-				foreach($headers as $header_name => $header_value){
-		                  if(in_array(strtolower($header_name), array('cc', 'bcc', 'reply-to', 'replyto'))){
-		                    $addresses = preg_split('/(,|;)/', $header_value);
-		                  }
-		                  switch(strtolower($header_name)) {
-		                    case 'cc':
-		                      foreach($addresses as $address){ $this->mailer->addCC($address); }
-		                      break;
-		                    case 'bcc':
-		                      foreach($addresses as $address) { $this->mailer->addBCC($address); }
-		                      break;
-		                    case 'reply-to':
-		                      foreach($addresses as $address) { $this->mailer->addReplyTo($address); }
-		                      break;
-		                    default:
-					$this->mailer->AddCustomHeader($header_name . ':' . $header_value);
-		                      break;
-		                  }
-				}
+        //Convert cc/bcc/ReplyTo from headers to properties
+        foreach($headers as $header_name => $header_value){
+            if(in_array(strtolower($header_name), array('cc', 'bcc', 'reply-to', 'replyto'))){
+                $addresses = preg_split('/(,|;)/', $header_value);
+            }
+            switch(strtolower($header_name)) {
+                case 'cc':
+                    foreach($addresses as $address){ $this->mailer->addCC($address); }
+                    break;
+                case 'bcc':
+                    foreach($addresses as $address) { $this->mailer->addBCC($address); }
+                    break;
+                case 'reply-to':
+                    foreach($addresses as $address) { $this->mailer->addReplyTo($address); }
+                    break;
+                default:
+                    $this->mailer->addCustomHeader($header_name . ':' . $header_value);
+                    break;
+            }
+        }
     }
 
     /**
@@ -252,9 +253,9 @@ class SmtpMailer implements Mailer {
     protected function attachFiles( array $attachedFiles ) {
         if( !empty( $attachedFiles ) and is_array( $attachedFiles ) ) {
             foreach( $attachedFiles as $attachedFile ) {
-				// Making attached files work again
-				//debug::dump($attachedFile['filename']);
-                $this->mailer->AddAttachment( $attachedFile['filename'] );
+                // Making attached files work again
+                //debug::dump($attachedFile['filename']);
+                $this->mailer->addAttachment( $attachedFile['filename'] );
             }
         }
     }
